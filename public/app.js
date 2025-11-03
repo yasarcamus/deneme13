@@ -5,6 +5,7 @@ const sendBtn = document.getElementById('send')
 const counterEl = document.getElementById('counter')
 const characterEl = document.getElementById('character')
 
+const API_BASE = (typeof window !== 'undefined' && window.BACKEND_URL) ? window.BACKEND_URL : ''
 let history = []
 
 function addMessage(role, text) {
@@ -40,7 +41,8 @@ formEl.addEventListener('submit', async (e) => {
   counterEl.textContent = '0/500'
   setLoading(true)
   try {
-    const res = await fetch('/api/chat', {
+    const apiBase = (API_BASE || '').replace(/\/+$/, '')
+    const res = await fetch(`${apiBase}/api/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ character, message: text, history })
