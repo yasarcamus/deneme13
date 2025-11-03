@@ -1,24 +1,4 @@
-const express = require('express')
-const rateLimit = require('express-rate-limit')
-const cors = require('cors')
 const axios = require('axios')
-const path = require('path')
-require('dotenv').config()
-
-const app = express()
-app.set('trust proxy', 1)
-app.use(cors())
-app.use(express.json({ limit: '1mb' }))
-
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 50,
-  standardHeaders: true,
-  legacyHeaders: false
-})
-app.use('/api', limiter)
-
-const PORT = process.env.PORT || 3000
 
 const charPrompts = {
   marin: `SEN MARİN KİTAGAWA'SIN
@@ -97,17 +77,35 @@ const charPrompts = {
 - İçsel düşüncelerini yazma; yalnızca sonucu cevabına yansıt.`
 }
 
-app.post('/api/chat', async (req, res) => {
+const corsHeaders = (origin) => ({
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': origin || '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'POST,OPTIONS'
+})
+
+exports.handler = async (event) => {
+  const origin = event.headers && (event.headers.origin || event.headers.Origin) || '*'
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 204, headers: corsHeaders(origin), body: '' }
+  }
+
   try {
-    const body = req.body || {}
+    const body = JSON.parse(event.body || '{}')
     const character = (body.character || '').toString().toLowerCase()
     const messageRaw = (body.message || '').toString()
     const message = messageRaw.trim()
     const history = Array.isArray(body.history) ? body.history : []
 
-    if (!['marin', 'zerotwo'].includes(character)) return res.status(400).json({ error: 'Geçersiz karakter' })
-    if (!message || message.length === 0) return res.status(400).json({ error: 'Mesaj gerekli' })
-    if (message.length > 500) return res.status(400).json({ error: 'Mesaj 500 karakteri geçmemeli' })
+    if (!['marin', 'zerotwo'].includes(character)) {
+      return { statusCode: 400, headers: corsHeaders(origin), body: JSON.stringify({ error: 'Geçersiz karakter' }) }
+    }
+    if (!message || message.length === 0) {
+      return { statusCode: 400, headers: corsHeaders(origin), body: JSON.stringify({ error: 'Mesaj gerekli' }) }
+    }
+    if (message.length > 500) {
+      return { statusCode: 400, headers: corsHeaders(origin), body: JSON.stringify({ error: 'Mesaj 500 karakteri geçmemeli' }) }
+    }
 
     const systemPrompt = charPrompts[character]
 
@@ -123,9 +121,12 @@ app.post('/api/chat', async (req, res) => {
     ]
 
     const apiKey = process.env.OPENROUTER_API_KEY
-    if (!apiKey) return res.status(500).json({ error: 'Sunucu yapılandırma hatası' })
+    if (!apiKey) {
+      return { statusCode: 500, headers: corsHeaders(origin), body: JSON.stringify({ error: 'Sunucu yapılandırma hatası (API key yok)' }) }
+    }
 
-    const referer = process.env.PUBLIC_SITE_URL || (req.headers.origin || ('http://localhost:' + PORT))
+    const referer = process.env.PUBLIC_SITE_URL || (event.headers.origin || (`https://${event.headers.host}`))
+
     const orRes = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
       model: 'venice/uncensored:free',
       messages,
@@ -142,21 +143,17 @@ app.post('/api/chat', async (req, res) => {
 
     const choice = orRes && orRes.data && orRes.data.choices && orRes.data.choices[0]
     const reply = choice && choice.message && choice.message.content ? choice.message.content : ''
-    if (!reply) return res.status(502).json({ error: 'Model yanıtı alınamadı' })
+    if (!reply) {
+      return { statusCode: 502, headers: corsHeaders(origin), body: JSON.stringify({ error: 'Model yanıtı alınamadı' }) }
+    }
 
-    return res.json({ reply })
+    return { statusCode: 200, headers: corsHeaders(origin), body: JSON.stringify({ reply }) }
   } catch (err) {
     if (axios.isAxiosError(err)) {
       const status = (err.response && err.response.status) || 500
       const msg = (err.response && err.response.data && (err.response.data.error || err.response.data.message)) || 'Dış API hatası'
-      return res.status(status === 429 ? 429 : 502).json({ error: msg })
+      return { statusCode: status === 429 ? 429 : 502, headers: corsHeaders(origin), body: JSON.stringify({ error: msg }) }
     }
-    return res.status(500).json({ error: 'Sunucu hatası' })
+    return { statusCode: 500, headers: corsHeaders(origin), body: JSON.stringify({ error: 'Sunucu hatası' }) }
   }
-})
-
-app.use(express.static(path.join(__dirname, 'public')))
-
-app.listen(PORT, () => {
-  console.log('Server running on http://localhost:' + PORT)
-})
+}

@@ -47,8 +47,27 @@ formEl.addEventListener('submit', async (e) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ character, message: text, history })
     })
-    const data = await res.json()
-    if (!res.ok) throw new Error(data && data.error ? data.error : 'Sunucu hatası')
+    const ct = res.headers.get('content-type') || ''
+    if (!res.ok) {
+      let errMsg = 'Sunucu hatası'
+      try {
+        if (ct.includes('application/json')) {
+          const j = await res.json()
+          errMsg = (j && (j.error || j.message)) || errMsg
+        } else {
+          const t = await res.text()
+          errMsg = t ? t.slice(0, 200) : errMsg
+        }
+      } catch (_) {}
+      throw new Error(errMsg)
+    }
+    let data
+    if (ct.includes('application/json')) {
+      data = await res.json()
+    } else {
+      const t = await res.text()
+      throw new Error(t ? t.slice(0, 200) : 'Beklenmeyen yanıt')
+    }
     addMessage('assistant', data.reply)
   } catch (err) {
     addMessage('assistant', `Hata: ${(err && err.message) || 'Bilinmeyen hata'}`)
@@ -58,3 +77,6 @@ formEl.addEventListener('submit', async (e) => {
 })
 
 addMessage('assistant', 'Karakter seç ve mesaj yaz. Tüm karakterler 18+ ve sohbet rızalıdır.')
+if (!API_BASE && typeof location !== 'undefined' && location.hostname !== 'localhost') {
+  addMessage('assistant', 'Not: Üretimde backend adresi gerekiyorsa config.js içindeki BACKEND_URL değerini ayarlayın.')
+}
