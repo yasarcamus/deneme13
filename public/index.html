@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TR AI Karakter Chat</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">TR AI Karakter Chat</div>
+    <div class="controls">
+      <select id="character">
+        <option value="marin">Marin Kitagawa</option>
+        <option value="zerotwo">Zero Two</option>
+      </select>
+    </div>
+  </header>
+
+  <main class="container">
+    <div id="chat" class="chat"></div>
+    <form id="form" class="composer">
+      <textarea id="input" rows="2" maxlength="500" placeholder="Mesajını yaz (max 500 karakter)"></textarea>
+      <div class="composer-actions">
+        <div id="counter">0/500</div>
+        <button id="send" type="submit">Gönder</button>
+      </div>
+    </form>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
