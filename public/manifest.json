@@ -1,0 +1,23 @@
+{
+  "name": "TR AI Karakter Chat",
+  "short_name": "AI Chat",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#12121a",
+  "background_color": "#0b0b10",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait"
+}

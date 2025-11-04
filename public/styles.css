@@ -29,3 +29,17 @@ body[data-character="zerotwo"] .composer textarea:focus{border-color:#fe5675;box
 #send{background:#6c7dff;color:#fff;border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
 #send[disabled]{opacity:.6;cursor:not-allowed}
 .system{font-size:12px;opacity:.7;margin-bottom:8px}
+
+/* Yazıyor Göstergesi */
+.typing{display:flex;margin:5px 0;opacity:0.7}
+.typing .bubble{background:#1a1a28!important;padding:10px 12px;border-radius:12px;max-width:90px;display:flex;align-items:center}
+.typing-dots{display:flex;gap:4px}
+.typing-dots span{display:inline-block;width:8px;height:8px;border-radius:50%;background:currentColor;opacity:0.6;animation:typing 1.4s infinite both}
+.typing-dots span:nth-child(2){animation-delay:.2s}
+.typing-dots span:nth-child(3){animation-delay:.4s}
+
+body[data-character="marin"] .typing .bubble{border-left:3px solid #ff9ed8}
+body[data-character="zerotwo"] .typing .bubble{border-left:3px solid #fe5675}
+
+/* Yazıyor animasyonu */
+@keyframes typing{0%{opacity:.6;transform:translateY(0)}50%{opacity:1;transform:translateY(-4px)}100%{opacity:.6;transform:translateY(0)}}

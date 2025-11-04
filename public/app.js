@@ -7,34 +7,125 @@ const characterEl = document.getElementById('character')
 
 const API_BASE = (typeof window !== 'undefined' && window.BACKEND_URL) ? window.BACKEND_URL : ''
 let history = []
+let typingIndicator = null
 
-// Karakter değişiminde sohbeti temizle
+// LocalStorage anahtarı oluşturma yardımcısı
+const storageKey = (character) => `chat_history_${character}`
+
+// Sohbet geçmişi için localStorage
+const saveHistory = (character, history) => {
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem(storageKey(character), JSON.stringify(history))
+  }
+}
+
+const loadHistory = (character) => {
+  if (typeof localStorage !== 'undefined') {
+    const saved = localStorage.getItem(storageKey(character))
+    if (saved) {
+      try {
+        return JSON.parse(saved)
+      } catch (e) {
+        console.error('Geçmiş yükleme hatası:', e)
+        return []
+      }
+    }
+  }
+  return []
+}
+
+// Karakter değişiminde sohbeti yükle/değiştir
 characterEl.addEventListener('change', () => {
-  // Tüm sohbet baloncuklarını temizle (ilk karşılama mesajı hariç)
-  while (chatEl.children.length > 1) {
+  // Tüm sohbet baloncuklarını temizle
+  while (chatEl.children.length > 0) {
     chatEl.removeChild(chatEl.lastChild)
   }
   
-  // History'yi temizle ve ilk karşılama mesajını ekle
-  history = []
-  
-  // Seçilen karaktere göre karşılama mesajı göster
   const character = characterEl.value
-  let greeting = ''
   
-  if (character === 'marin') {
-    greeting = 'Yaaa~ merhaba canım! Marin burada! 😍 Nasılsın? Bugiin ne yapalım?'
-  } else if (character === 'zerotwo') {
-    greeting = 'Hmm, beni mi seçtin darling? 🔥 Zero Two emrindeydi...'
+  // LocalStorage'dan bu karakter için geçmiş varsa yükle
+  const savedHistory = loadHistory(character)
+  if (savedHistory && savedHistory.length > 0) {
+    // Geçmiş sohbeti göster
+    history = savedHistory
+    history.forEach(msg => {
+      if (msg.role === 'user' || msg.role === 'assistant') {
+        const row = document.createElement('div')
+        row.className = `msg ${msg.role}`
+        const bubble = document.createElement('div')
+        bubble.className = 'bubble'
+        bubble.textContent = msg.content
+        row.appendChild(bubble)
+        chatEl.appendChild(row)
+      }
+    })
+  } else {
+    // Yeni sohbet başlat
+    history = []
+    
+    // Seçilen karaktere göre karşılama mesajı göster
+    let greeting = ''
+    if (character === 'marin') {
+      greeting = 'Yaaa~ merhaba canım! Marin burada! 😍 Nasılsın? Bugiin ne yapalım?'
+    } else if (character === 'zerotwo') {
+      greeting = 'Hmm, beni mi seçtin darling? 🔥 Zero Two emrindeydi...'
+    }
+    
+    addMessage('assistant', greeting)
   }
   
-  addMessage('assistant', greeting)
+  // Scroll to bottom
+  chatEl.scrollTop = chatEl.scrollHeight
   
   // CSS efektleri - karaktere göre tema değiştirme
   document.body.setAttribute('data-character', character)
 })
 
+// Yazma animasyonu gösterme
+function showTyping() {
+  // Varsa öncekini kaldır
+  hideTyping()
+  
+  // Karakter tipine göre özel mesajlar
+  let typingText = ''
+  const character = characterEl.value
+  
+  if (character === 'marin') {
+    typingText = 'yazıyor...'
+  } else if (character === 'zerotwo') {
+    typingText = 'düşünüyor...'
+  } else {
+    typingText = 'yazıyor...'
+  }
+  
+  typingIndicator = document.createElement('div')
+  typingIndicator.className = 'typing msg assistant'
+  
+  const bubble = document.createElement('div')
+  bubble.className = 'bubble'
+  
+  const dots = document.createElement('div')
+  dots.className = 'typing-dots'
+  dots.innerHTML = '<span></span><span></span><span></span>'
+  
+  bubble.appendChild(dots)
+  typingIndicator.appendChild(bubble)
+  chatEl.appendChild(typingIndicator)
+  chatEl.scrollTop = chatEl.scrollHeight
+}
+
+// Yazma animasyonunu gizleme
+function hideTyping() {
+  if (typingIndicator && typingIndicator.parentNode) {
+    typingIndicator.parentNode.removeChild(typingIndicator)
+    typingIndicator = null
+  }
+}
+
 function addMessage(role, text) {
+  // Önce yazma animasyonunu kaldır
+  hideTyping()
+  
   const row = document.createElement('div')
   row.className = `msg ${role}`
   const bubble = document.createElement('div')
@@ -43,7 +134,12 @@ function addMessage(role, text) {
   row.appendChild(bubble)
   chatEl.appendChild(row)
   chatEl.scrollTop = chatEl.scrollHeight
-  if (role === 'user' || role === 'assistant') history.push({ role, content: text })
+  
+  if (role === 'user' || role === 'assistant') {
+    history.push({ role, content: text })
+    // Sadece başarılı mesajları kaydederiz
+    saveHistory(characterEl.value, history)
+  }
 }
 
 function setLoading(loading) {
@@ -68,6 +164,9 @@ formEl.addEventListener('submit', async (e) => {
   inputEl.value = ''
   counterEl.textContent = '0/500'
   setLoading(true)
+  
+  // Yazıyor göstergesi
+  showTyping()
   
   // Track retries
   let retries = 0
@@ -144,6 +243,7 @@ formEl.addEventListener('submit', async (e) => {
       }
     }
   } catch (err) {
+    hideTyping() // Hata durumunda yazıyor göstergesini kaldır
     addMessage('assistant', `Beklenmeyen hata: ${err.message || 'Bilinmeyen'}`)
   } finally {
     setLoading(false)

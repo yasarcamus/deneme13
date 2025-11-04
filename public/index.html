@@ -4,7 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TR AI Karakter Chat</title>
+  <meta name="description" content="TR AI Karakter Chat, anime karakterleriyle sohbet edebileceğiniz yapay zeka destekli bir uygulama">
+  <meta name="theme-color" content="#12121a">
   <link rel="stylesheet" href="/styles.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="/icon-192x192.png">
+  <link rel="apple-touch-icon" href="/icon-192x192.png">
 </head>
 <body data-character="marin">
   <header class="topbar">
@@ -30,5 +35,17 @@
 
   <script src="/config.js"></script>
   <script src="/app.js"></script>
+  <script>
+    // Service Worker Kaydı
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then(registration => {
+          console.log('ServiceWorker kayıt başarılı:', registration.scope);
+        }).catch(error => {
+          console.log('ServiceWorker kayıt hatası:', error);
+        });
+      });
+    }
+  </script>
 </body>
 </html>
