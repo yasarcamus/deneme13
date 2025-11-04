@@ -70,13 +70,18 @@ formEl.addEventListener('submit', async (e) => {
     }
     addMessage('assistant', data.reply)
   } catch (err) {
-    addMessage('assistant', `Hata: ${(err && err.message) || 'Bilinmeyen hata'}`)
+    let msg = 'Bilinmeyen hata'
+    if (err) {
+      const m = (err && 'message' in err) ? err.message : err
+      if (typeof m === 'string') msg = m
+      else {
+        try { msg = JSON.stringify(m) } catch (_) { msg = String(m) }
+      }
+    }
+    addMessage('assistant', `Hata: ${msg}`)
   } finally {
     setLoading(false)
   }
 })
 
 addMessage('assistant', 'Karakter seç ve mesaj yaz. Tüm karakterler 18+ ve sohbet rızalıdır.')
-if (!API_BASE && typeof location !== 'undefined' && location.hostname !== 'localhost') {
-  addMessage('assistant', 'Not: Üretimde backend adresi gerekiyorsa config.js içindeki BACKEND_URL değerini ayarlayın.')
-}

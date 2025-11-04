@@ -111,8 +111,8 @@ exports.handler = async (event) => {
 
     const safeHistory = history
       .filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
-      .slice(-20)
-      .map(m => ({ role: m.role, content: m.content.toString().slice(0, 2000) }))
+      .slice(-10)
+      .map(m => ({ role: m.role, content: m.content.toString().slice(0, 600) }))
 
     const messages = [
       { role: 'system', content: systemPrompt },
@@ -151,9 +151,18 @@ exports.handler = async (event) => {
   } catch (err) {
     if (axios.isAxiosError(err)) {
       const status = (err.response && err.response.status) || 500
-      const msg = (err.response && err.response.data && (err.response.data.error || err.response.data.message)) || 'Dış API hatası'
+      let msg = 'Dış API hatası'
+      try {
+        if (err.response && err.response.data) {
+          if (typeof err.response.data === 'string') msg = err.response.data.slice(0, 200)
+          else if (typeof err.response.data.error === 'string') msg = err.response.data.error
+          else if (typeof err.response.data.message === 'string') msg = err.response.data.message
+          else msg = JSON.stringify(err.response.data).slice(0, 200)
+        }
+      } catch (_) {}
       return { statusCode: status === 429 ? 429 : 502, headers: corsHeaders(origin), body: JSON.stringify({ error: msg }) }
     }
-    return { statusCode: 500, headers: corsHeaders(origin), body: JSON.stringify({ error: 'Sunucu hatası' }) }
+    const msg = (err && err.message) ? err.message : 'Sunucu hatası'
+    return { statusCode: 500, headers: corsHeaders(origin), body: JSON.stringify({ error: msg }) }
   }
 }
