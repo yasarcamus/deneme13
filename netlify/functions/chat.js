@@ -1,4 +1,5 @@
 const axios = require('axios')
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 const charPrompts = {
   marin: `SEN MARİN KİTAGAWA'SIN
@@ -160,7 +161,22 @@ exports.handler = async (event) => {
           else msg = JSON.stringify(err.response.data).slice(0, 200)
         }
       } catch (_) {}
-      return { statusCode: status === 429 ? 429 : 502, headers: corsHeaders(origin), body: JSON.stringify({ error: msg }) }
+      // OpenRouter rate limit - try to parse out friendly message
+      if (status === 429) {
+        // Try to extract a user-friendly message
+        let friendlyMsg = 'Model geçici olarak meşgul. Lütfen birkaç saniye bekleyip tekrar deneyin.'
+        if (err.response && err.response.data) {
+          // Check if it's a rate-limit error with raw message
+          if (err.response.data.error && err.response.data.error.message) {
+            friendlyMsg = 'Model şu anda yoğun. Lütfen birkaç saniye bekleyip tekrar deneyin.'
+          } else if (err.response.data.error && typeof err.response.data.error === 'string' && 
+                    err.response.data.error.includes('rate-limited')) {
+            friendlyMsg = 'Model şu anda yoğun. Lütfen birkaç saniye bekleyip tekrar deneyin.'
+          }
+        }
+        return { statusCode: 429, headers: corsHeaders(origin), body: JSON.stringify({ error: friendlyMsg }) }
+      }
+      return { statusCode: 502, headers: corsHeaders(origin), body: JSON.stringify({ error: msg }) }
     }
     const msg = (err && err.message) ? err.message : 'Sunucu hatası'
     return { statusCode: 500, headers: corsHeaders(origin), body: JSON.stringify({ error: msg }) }
