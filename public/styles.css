@@ -17,6 +17,13 @@ body[data-character="zerotwo"] .topbar{border-bottom-color:#fe5675}
 .msg{display:flex;gap:10px;margin:10px 0;animation:fadeIn 0.3s ease-in-out}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .msg .bubble{max-width:78%;padding:10px 12px;border-radius:12px;line-height:1.4;white-space:pre-wrap;word-wrap:break-word}
+
+/* Fiziksel eylemler için özel stil - * ile yazılan metinler */
+.msg .bubble em, .msg .bubble i{font-style:italic;opacity:0.9;color:#d0a9ff}
+body[data-character="marin"] .msg.assistant .bubble em, 
+body[data-character="marin"] .msg.assistant .bubble i{color:#ffb8e6}
+body[data-character="zerotwo"] .msg.assistant .bubble em,
+body[data-character="zerotwo"] .msg.assistant .bubble i{color:#ff9797}
 .msg.user{justify-content:flex-end}
 .msg.user .bubble{background:#2f3566;color:#fff;border-top-right-radius:4px}
 .msg.assistant .bubble{background:#1f243d;color:#eaeaf0;border-top-left-radius:4px}

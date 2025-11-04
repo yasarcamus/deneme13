@@ -11,20 +11,37 @@ let typingIndicator = null
 
 // LocalStorage anahtarı oluşturma yardımcısı
 const storageKey = (character) => `chat_history_${character}`
+const currentHistoryKey = 'current_character'
+
+// Sohbet geçmişleri için global map
+const characterHistories = {}
 
 // Sohbet geçmişi için localStorage
 const saveHistory = (character, history) => {
+  // Hafızada tut
+  characterHistories[character] = [...history]
+  
+  // LocalStorage'a kaydet
   if (typeof localStorage !== 'undefined') {
     localStorage.setItem(storageKey(character), JSON.stringify(history))
+    localStorage.setItem(currentHistoryKey, character)
   }
 }
 
 const loadHistory = (character) => {
+  // Önce hafızadan kontrol et
+  if (characterHistories[character]) {
+    return [...characterHistories[character]]
+  }
+  
+  // Yoksa localStorage'dan yükle
   if (typeof localStorage !== 'undefined') {
     const saved = localStorage.getItem(storageKey(character))
     if (saved) {
       try {
-        return JSON.parse(saved)
+        const parsed = JSON.parse(saved)
+        characterHistories[character] = parsed // Hafızaya da kopyala
+        return parsed
       } catch (e) {
         console.error('Geçmiş yükleme hatası:', e)
         return []
@@ -32,6 +49,16 @@ const loadHistory = (character) => {
     }
   }
   return []
+}
+
+// Tüm geçmiş temizleme (geliştirme amaçlı)
+const clearAllHistories = () => {
+  Object.keys(characterHistories).forEach(char => {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem(storageKey(char))
+    }
+  })
+  Object.keys(characterHistories).forEach(key => delete characterHistories[key])
 }
 
 // Karakter değişiminde sohbeti yükle/değiştir
@@ -130,7 +157,16 @@ function addMessage(role, text) {
   row.className = `msg ${role}`
   const bubble = document.createElement('div')
   bubble.className = 'bubble'
-  bubble.textContent = text
+  
+  // Fiziksel eylemleri (*ile çevrili metinleri*) <em> tag ile çevir
+  if (role === 'assistant') {
+    // Yıldızlar (*) arasındaki metinleri <em> tag ile değiştir
+    const processedText = text.replace(/\*(.*?)\*/g, '<em>$1</em>')
+    bubble.innerHTML = processedText
+  } else {
+    bubble.textContent = text
+  }
+  
   row.appendChild(bubble)
   chatEl.appendChild(row)
   chatEl.scrollTop = chatEl.scrollHeight
