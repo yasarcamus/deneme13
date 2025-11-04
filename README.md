@@ -31,3 +31,23 @@ npm start
 - API key yalnızca backend `.env` içinde tutulur.
 - `.gitignore` `.env` ve `node_modules` dizinini dışlar.
 - Frontend hiçbir gizli bilgi içermez; istekler `/api/chat` proxy üzerinden gider.
+
+## Netlify (Frontend + Functions)
+
+1. Site Settings → Build & deploy → Environment → Add variables:
+```
+OPENROUTER_API_KEY=sk-or-v1-...    # tam anahtar (tırnaksız)
+PUBLIC_SITE_URL=https://<site-adin>.netlify.app
+```
+
+2. Deploys → Clear cache and deploy site
+
+3. Doğrula:
+- Deploy ayrıntısında Functions: `chat` görünmeli
+- `https://<site-adin>.netlify.app` yüklenmeli
+- Network → `/api/chat` çağrısı 200 ve `application/json`
+
+### Sorun Giderme
+- 401/403: OpenRouter anahtarının yetkilerini (chat completions) ve Allowed Referers listesinde sitenizi kontrol edin
+- 500: Netlify env var eksik olabilir
+- `Unexpected end of JSON`: Fonksiyon JSON döndürmüyordur → env varları ve fonksiyon loglarını kontrol edin
