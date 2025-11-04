@@ -1,16 +1,30 @@
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;background:#0b0b10;color:#eaeaf0}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;background:#0b0b10;color:#eaeaf0;transition:all 0.3s ease}
+
+/* Marin tema - default */
+body[data-character="marin"] .msg.assistant .bubble{background:#2b1f3d;border-left:3px solid #ff9ed8}
+body[data-character="marin"] #send{background:#ff9ed8}
+body[data-character="marin"] .topbar{border-bottom-color:#ff9ed8}
+
+/* Zero Two tema */
+body[data-character="zerotwo"] .msg.assistant .bubble{background:#3d1f1f;border-left:3px solid #fe5675}
+body[data-character="zerotwo"] #send{background:#fe5675}
+body[data-character="zerotwo"] .topbar{border-bottom-color:#fe5675}
 .topbar{position:sticky;top:0;display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#12121a;border-bottom:1px solid #232333;z-index:10}
 .brand{font-weight:700;letter-spacing:.2px}
 .controls select{background:#1a1a25;color:#eaeaf0;border:1px solid #2a2a3a;padding:6px 10px;border-radius:8px}
 .container{max-width:900px;margin:0 auto;padding:16px}
 .chat{height:70vh;overflow:auto;border:1px solid #24243a;border-radius:12px;padding:12px;background:#111119}
-.msg{display:flex;gap:10px;margin:10px 0}
+.msg{display:flex;gap:10px;margin:10px 0;animation:fadeIn 0.3s ease-in-out}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .msg .bubble{max-width:78%;padding:10px 12px;border-radius:12px;line-height:1.4;white-space:pre-wrap;word-wrap:break-word}
 .msg.user{justify-content:flex-end}
 .msg.user .bubble{background:#2f3566;color:#fff;border-top-right-radius:4px}
 .msg.assistant .bubble{background:#1f243d;color:#eaeaf0;border-top-left-radius:4px}
 .composer{display:flex;flex-direction:column;gap:8px;margin-top:12px}
-.composer textarea{resize:vertical;min-height:56px;max-height:160px;background:#121224;color:#eaeaf0;border:1px solid #2a2a3a;border-radius:10px;padding:10px}
+.composer textarea{resize:vertical;min-height:56px;max-height:160px;background:#121224;color:#eaeaf0;border:1px solid #2a2a3a;border-radius:10px;padding:10px;transition:all 0.3s ease}
+
+body[data-character="marin"] .composer textarea:focus{border-color:#ff9ed8;box-shadow:0 0 0 1px rgba(255,158,216,0.3)}
+body[data-character="zerotwo"] .composer textarea:focus{border-color:#fe5675;box-shadow:0 0 0 1px rgba(254,86,117,0.3)}
 .composer-actions{display:flex;justify-content:space-between;align-items:center}
 #send{background:#6c7dff;color:#fff;border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
 #send[disabled]{opacity:.6;cursor:not-allowed}

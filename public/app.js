@@ -8,6 +8,32 @@ const characterEl = document.getElementById('character')
 const API_BASE = (typeof window !== 'undefined' && window.BACKEND_URL) ? window.BACKEND_URL : ''
 let history = []
 
+// Karakter değişiminde sohbeti temizle
+characterEl.addEventListener('change', () => {
+  // Tüm sohbet baloncuklarını temizle (ilk karşılama mesajı hariç)
+  while (chatEl.children.length > 1) {
+    chatEl.removeChild(chatEl.lastChild)
+  }
+  
+  // History'yi temizle ve ilk karşılama mesajını ekle
+  history = []
+  
+  // Seçilen karaktere göre karşılama mesajı göster
+  const character = characterEl.value
+  let greeting = ''
+  
+  if (character === 'marin') {
+    greeting = 'Yaaa~ merhaba canım! Marin burada! 😍 Nasılsın? Bugiin ne yapalım?'
+  } else if (character === 'zerotwo') {
+    greeting = 'Hmm, beni mi seçtin darling? 🔥 Zero Two emrindeydi...'
+  }
+  
+  addMessage('assistant', greeting)
+  
+  // CSS efektleri - karaktere göre tema değiştirme
+  document.body.setAttribute('data-character', character)
+})
+
 function addMessage(role, text) {
   const row = document.createElement('div')
   row.className = `msg ${role}`
@@ -25,9 +51,12 @@ function setLoading(loading) {
   sendBtn.textContent = loading ? 'Gönderiliyor…' : 'Gönder'
 }
 
-inputEl.addEventListener('input', () => {
-  const val = inputEl.value
-  counterEl.textContent = `${val.length}/500`
+// Enter ile gönderme
+inputEl.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault()
+    formEl.requestSubmit()
+  }
 })
 
 formEl.addEventListener('submit', async (e) => {
@@ -35,7 +64,6 @@ formEl.addEventListener('submit', async (e) => {
   const character = characterEl.value
   const text = inputEl.value.trim()
   if (!text) return
-  if (text.length > 500) { alert('Mesaj 500 karakteri geçmemeli'); return }
   addMessage('user', text)
   inputEl.value = ''
   counterEl.textContent = '0/500'
@@ -106,9 +134,7 @@ formEl.addEventListener('submit', async (e) => {
         if (is429 && retries < maxRetries) {
           retries++
           const waitTime = retries * 2000 // Exponential backoff: 2s, 4s, 6s
-          addMessage('assistant', `Model şu anda yoğun. ${retries}/${maxRetries} otomatik yeniden deneme... (${waitTime/1000}s)`)
-          
-          // Wait and then retry
+          // Sessizce yeniden dene, mesaj gösterme
           await new Promise(resolve => setTimeout(resolve, waitTime))
         } else {
           // Either not a 429 or we're out of retries
@@ -124,4 +150,4 @@ formEl.addEventListener('submit', async (e) => {
   }
 })
 
-addMessage('assistant', 'Karakter seç ve mesaj yaz. Tüm karakterler 18+ ve sohbet rızalıdır. Rate limit durumunda otomatik yeniden deneme yaparız.')
+addMessage('assistant', 'Karakter seç ve mesaj yaz. Tüm karakterler 18+ ve sohbet rızalıdır.')

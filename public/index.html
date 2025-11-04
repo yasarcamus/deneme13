@@ -6,7 +6,7 @@
   <title>TR AI Karakter Chat</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
-<body>
+<body data-character="marin">
   <header class="topbar">
     <div class="brand">TR AI Karakter Chat</div>
     <div class="controls">
@@ -22,7 +22,7 @@
     <form id="form" class="composer">
       <textarea id="input" rows="2" maxlength="500" placeholder="Mesajını yaz (max 500 karakter)"></textarea>
       <div class="composer-actions">
-        <div id="counter">0/500</div>
+        <div id="counter" style="display:none;">0/500</div>
         <button id="send" type="submit">Gönder</button>
       </div>
     </form>
