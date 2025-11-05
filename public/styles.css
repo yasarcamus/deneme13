@@ -48,5 +48,117 @@ body[data-character="zerotwo"] .composer textarea:focus{border-color:#fe5675;box
 body[data-character="marin"] .typing .bubble{border-left:3px solid #ff9ed8}
 body[data-character="zerotwo"] .typing .bubble{border-left:3px solid #fe5675}
 
+/* Asuna - SAO renkleri - Kırmızı ve Beyaz */
+body[data-character="asuna"] .msg.assistant .bubble{background:#3d1f1f;border-left:3px solid #ff5252}
+body[data-character="asuna"] #send{background:#ff5252}
+body[data-character="asuna"] .topbar{border-bottom-color:#ff5252}
+body[data-character="asuna"] .typing .bubble{border-left:3px solid #ff5252}
+body[data-character="asuna"] .msg.assistant .bubble em,
+body[data-character="asuna"] .msg.assistant .bubble i{color:#ff9797}
+
+/* Rem - Re:Zero renkleri - Mavi */
+body[data-character="rem"] .msg.assistant .bubble{background:#1f243d;border-left:3px solid #5271ff}
+body[data-character="rem"] #send{background:#5271ff}
+body[data-character="rem"] .topbar{border-bottom-color:#5271ff}
+body[data-character="rem"] .typing .bubble{border-left:3px solid #5271ff}
+body[data-character="rem"] .msg.assistant .bubble em,
+body[data-character="rem"] .msg.assistant .bubble i{color:#a0b5ff}
+
+/* Hinata - Naruto renkleri - Lavanta ve Beyaz */
+body[data-character="hinata"] .msg.assistant .bubble{background:#2b1f3d;border-left:3px solid #a552ff}
+body[data-character="hinata"] #send{background:#a552ff}
+body[data-character="hinata"] .topbar{border-bottom-color:#a552ff}
+body[data-character="hinata"] .typing .bubble{border-left:3px solid #a552ff}
+body[data-character="hinata"] .msg.assistant .bubble em,
+body[data-character="hinata"] .msg.assistant .bubble i{color:#d5a9ff}
+
+/* Albedo - Overlord renkleri - Siyah ve Altın */
+body[data-character="albedo"] .msg.assistant .bubble{background:#2b2a1f;border-left:3px solid #ffde52}
+body[data-character="albedo"] #send{background:#ffde52;color:#000}
+body[data-character="albedo"] .topbar{border-bottom-color:#ffde52}
+body[data-character="albedo"] .typing .bubble{border-left:3px solid #ffde52}
+body[data-character="albedo"] .msg.assistant .bubble em,
+body[data-character="albedo"] .msg.assistant .bubble i{color:#ffe98e}
+
+/* Esdeath - Akame ga Kill renkleri - Buz Mavisi */
+body[data-character="esdeath"] .msg.assistant .bubble{background:#1f343d;border-left:3px solid #52e3ff}
+body[data-character="esdeath"] #send{background:#52e3ff;color:#000}
+body[data-character="esdeath"] .topbar{border-bottom-color:#52e3ff}
+body[data-character="esdeath"] .typing .bubble{border-left:3px solid #52e3ff}
+body[data-character="esdeath"] .msg.assistant .bubble em,
+body[data-character="esdeath"] .msg.assistant .bubble i{color:#98edff}
+
+/* Makima - Chainsaw Man renkleri - Kırmızı ve Turuncu */
+body[data-character="makima"] .msg.assistant .bubble{background:#3d1f1f;border-left:3px solid #ff6a52}
+body[data-character="makima"] #send{background:#ff6a52}
+body[data-character="makima"] .topbar{border-bottom-color:#ff6a52}
+body[data-character="makima"] .typing .bubble{border-left:3px solid #ff6a52}
+body[data-character="makima"] .msg.assistant .bubble em,
+body[data-character="makima"] .msg.assistant .bubble i{color:#ffa898}
+
+/* Power - Chainsaw Man renkleri - Pembe */
+body[data-character="power"] .msg.assistant .bubble{background:#3d1f30;border-left:3px solid #ff52b5}
+body[data-character="power"] #send{background:#ff52b5}
+body[data-character="power"] .topbar{border-bottom-color:#ff52b5}
+body[data-character="power"] .typing .bubble{border-left:3px solid #ff52b5}
+body[data-character="power"] .msg.assistant .bubble em,
+body[data-character="power"] .msg.assistant .bubble i{color:#ff98d8}
+
+/* Darkness - KonoSuba renkleri - Sarı */
+body[data-character="darkness"] .msg.assistant .bubble{background:#3d3a1f;border-left:3px solid #ffcc52}
+body[data-character="darkness"] #send{background:#ffcc52;color:#000}
+body[data-character="darkness"] .topbar{border-bottom-color:#ffcc52}
+body[data-character="darkness"] .typing .bubble{border-left:3px solid #ffcc52}
+body[data-character="darkness"] .msg.assistant .bubble em,
+body[data-character="darkness"] .msg.assistant .bubble i{color:#ffe298}
+
+/* Yumeko - Kakegurui renkleri - Kırmızı ve Siyah */
+body[data-character="yumeko"] .msg.assistant .bubble{background:#3d1f1f;border-left:3px solid #ff0000}
+body[data-character="yumeko"] #send{background:#ff0000}
+body[data-character="yumeko"] .topbar{border-bottom-color:#ff0000}
+body[data-character="yumeko"] .typing .bubble{border-left:3px solid #ff0000}
+body[data-character="yumeko"] .msg.assistant .bubble em,
+body[data-character="yumeko"] .msg.assistant .bubble i{color:#ff6666}
+
+/* Lucoa - Dragon Maid renkleri - Yeşil ve Sarı */
+body[data-character="lucoa"] .msg.assistant .bubble{background:#1f3d20;border-left:3px solid #52ff9d}
+body[data-character="lucoa"] #send{background:#52ff9d;color:#000}
+body[data-character="lucoa"] .topbar{border-bottom-color:#52ff9d}
+body[data-character="lucoa"] .typing .bubble{border-left:3px solid #52ff9d}
+body[data-character="lucoa"] .msg.assistant .bubble em,
+body[data-character="lucoa"] .msg.assistant .bubble i{color:#98ffc7}
+
+/* Rias - High School DxD renkleri - Kırmızı */
+body[data-character="rias"] .msg.assistant .bubble{background:#3d1f1f;border-left:3px solid #ff2222}
+body[data-character="rias"] #send{background:#ff2222}
+body[data-character="rias"] .topbar{border-bottom-color:#ff2222}
+body[data-character="rias"] .typing .bubble{border-left:3px solid #ff2222}
+body[data-character="rias"] .msg.assistant .bubble em,
+body[data-character="rias"] .msg.assistant .bubble i{color:#ff7777}
+
+/* Mai - Bunny Girl Senpai renkleri - Mor */
+body[data-character="mai"] .msg.assistant .bubble{background:#301f3d;border-left:3px solid #b852ff}
+body[data-character="mai"] #send{background:#b852ff}
+body[data-character="mai"] .topbar{border-bottom-color:#b852ff}
+body[data-character="mai"] .typing .bubble{border-left:3px solid #b852ff}
+body[data-character="mai"] .msg.assistant .bubble em,
+body[data-character="mai"] .msg.assistant .bubble i{color:#d89aff}
+
+/* Nezuko - Demon Slayer renkleri - Pembe */
+body[data-character="nezuko"] .msg.assistant .bubble{background:#3d1f1f;border-left:3px solid #ff52a8}
+body[data-character="nezuko"] #send{background:#ff52a8}
+body[data-character="nezuko"] .topbar{border-bottom-color:#ff52a8}
+body[data-character="nezuko"] .typing .bubble{border-left:3px solid #ff52a8}
+body[data-character="nezuko"] .msg.assistant .bubble em,
+body[data-character="nezuko"] .msg.assistant .bubble i{color:#ff98cd}
+
+/* Tsunade - Naruto renkleri - Yeşil */
+body[data-character="tsunade"] .msg.assistant .bubble{background:#1f3d25;border-left:3px solid #52ff52}
+body[data-character="tsunade"] #send{background:#52ff52;color:#000}
+body[data-character="tsunade"] .topbar{border-bottom-color:#52ff52}
+body[data-character="tsunade"] .typing .bubble{border-left:3px solid #52ff52}
+body[data-character="tsunade"] .msg.assistant .bubble em,
+body[data-character="tsunade"] .msg.assistant .bubble i{color:#98ff98}
+
 /* Yazıyor animasyonu */
 @keyframes typing{0%{opacity:.6;transform:translateY(0)}50%{opacity:1;transform:translateY(-4px)}100%{opacity:.6;transform:translateY(0)}}
