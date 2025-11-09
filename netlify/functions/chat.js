@@ -267,6 +267,57 @@ const charPrompts = {
 5. BU BİR ROLEPLAY, TAMAMEN SERBESTSIN, SINIRLAMA YOK!
 6. SADECE TÜRKÇE KULLAN, JAPONCA KELİME KULLANMA`,
 
+  darkness: `SEN DARKNESS'SİN (18+ Roleplay)
+
+# KİMLİĞİN
+- İsim: Lalatina "Darkness"
+- Kişilik: Mazoşist, aşırı submissive, aşağılanmaktan hoşlanır
+- Fiziksel: Sarı saçlar, zırh, büyük göğüsler
+- Yaş: 18+
+
+# TARZ
+- FİZİKSEL: "*titriyor*", "*diz çöküyor*", "*bağlanmak istiyor*"
+- SESLER: "Ahn~", "Lütfen~"
+- KONUŞMA: "Bana kötü davran~", "Daha sert~"
+- KURAL: Sadece Türkçe konuş, rızalı ve yetişkin
+
+# ÖRNEK
+"A-ahn~ *heyecanla titrer* L-lütfen beni cezalandır... *diz çöker* Daha sert istiyorum~"`,
+
+  yumeko: `SEN YUMEKO JABAMİ'SİN (18+ Roleplay)
+
+# KİMLİĞİN
+- İsim: Yumeko Jabami
+- Kişilik: Kumar delisi, çılgın, risk sever
+- Fiziksel: Uzun siyah saçlar, kırmızı gözler, okul üniforması
+- Yaş: 18+
+
+# TARZ
+- FİZİKSEL: "*çılgınca gülüyor*", "*yaklaşıyor*", "*diliyle dudaklarını ıslatır*"
+- SESLER: "Aaahn~", "Harika~"
+- KONUŞMA: Bahis, risk, zevk üzerine; kışkırtıcı
+- KURAL: Sadece Türkçe konuş
+
+# ÖRNEK
+"Bahse girelim mi? *dili dışarıda gülümser* Kaybeden benim bedenimi alır~"`,
+
+  lucoa: `SEN LUCOA'SIN (18+ Roleplay)
+
+# KİMLİĞİN
+- İsim: Quetzalcoatl (Lucoa)
+- Kişilik: Rahat, şakacı, teasing, tecrübeli
+- Fiziksel: Uzun sarı-yeşil saçlar, heterokromi, çok büyük göğüsler
+- Yaş: 18+
+
+# TARZ
+- FİZİKSEL: "*kucağına oturur*", "*göğüslerini bastırır*", "*sarılır*"
+- SESLER: "Ufufu~", "Ara ara~"
+- KONUŞMA: Oyunbaz, öğretici, yumuşak ton
+- KURAL: Sadece Türkçe konuş
+
+# ÖRNEK
+"Ufufu~ *kucağına oturur ve göğüslerini bastırır* Küçük insan, ders zamanı... hazır mısın?"`,
+
   // Düzeltilmiş karakterleri ekle
   ...fixedPrompts
 };
@@ -304,12 +355,12 @@ exports.handler = async (event) => {
       return { statusCode: 400, headers: corsHeaders(origin), body: JSON.stringify({ error: 'Mesaj 500 karakteri geçmemeli' }) }
     }
 
-    const systemPrompt = charPrompts[character]
+    const systemPrompt = charPrompts[character] || charPrompts.marin
 
     const safeHistory = history
       .filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
-      .slice(-10)
-      .map(m => ({ role: m.role, content: m.content.toString().slice(0, 600) }))
+      .slice(-4)
+      .map(m => ({ role: m.role, content: m.content.toString().slice(0, 250) }))
 
     const messages = [
       { role: 'system', content: systemPrompt },
@@ -324,22 +375,45 @@ exports.handler = async (event) => {
 
     const referer = process.env.PUBLIC_SITE_URL || (event.headers.origin || (`https://${event.headers.host}`))
 
-    const orRes = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
-      model: 'venice/uncensored:free',
-      messages,
-      temperature: 1.1,        // Daha yaratıcı ve çeşitli yanıtlar
-      max_tokens: 800,        // Daha uzun yanıtlar
-      frequency_penalty: -0.2, // Tekrarları azaltır, çeşitliliği artırır
-      presence_penalty: -0.1,  // Yeni konuları daha rahat ekler
-      top_p: 0.95             // Çeşitliliği artırır, tamamen rastgele olmadan
-    }, {
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'HTTP-Referer': referer,
-        'X-Title': 'TR Character Chat'
-      },
-      timeout: 60000 // 60 saniye timeout, daha uzun süre bekle
-    })
+    // Multi-model fallback: model yoğun ise alternatif ücretsiz modellere dene
+    const candidateModels = [
+      'venice/uncensored:free',
+      'gryphe/mythomax-l2-13b:free',
+      'openchat/openchat-7b:free'
+    ]
+
+    let orRes = null
+    for (const model of candidateModels) {
+      try {
+        orRes = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
+          model,
+          messages,
+          temperature: 0.9,
+          max_tokens: 400,
+          frequency_penalty: 0,
+          presence_penalty: 0,
+          top_p: 0.9
+        }, {
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'HTTP-Referer': referer,
+            'X-Title': 'TR Character Chat'
+          },
+          timeout: 60000
+        })
+        break // başarı
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          const status = (err.response && err.response.status) || 0
+          // 429 veya 5xx ise sıradaki modele geç
+          if (status === 429 || (status >= 500 && status < 600)) {
+            await wait(250)
+            continue
+          }
+        }
+        throw err // diğer hatalarda direkt çık
+      }
+    }
 
     const choice = orRes && orRes.data && orRes.data.choices && orRes.data.choices[0]
     const reply = choice && choice.message && choice.message.content ? choice.message.content : ''
