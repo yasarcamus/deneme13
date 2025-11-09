@@ -336,8 +336,8 @@ exports.handler = async (event) => {
   }
 
   try {
-    // Rate limiti aşmamak için kısa bir bekletme
-    await wait(300) // API çağrısından önce kısa bekletme
+    // Rate limiti aşmamak için çok kısa bekletme
+    await wait(80) // API çağrısından önce mini bekleme
     
     const body = JSON.parse(event.body || '{}')
     const character = (body.character || '').toString().toLowerCase()
@@ -378,7 +378,6 @@ exports.handler = async (event) => {
     // Multi-model fallback: model yoğun ise alternatif ücretsiz modellere dene
     const candidateModels = [
       'venice/uncensored:free',
-      'gryphe/mythomax-l2-13b:free',
       'openchat/openchat-7b:free'
     ]
 
@@ -388,11 +387,11 @@ exports.handler = async (event) => {
         orRes = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
           model,
           messages,
-          temperature: 0.9,
-          max_tokens: 400,
+          temperature: 0.8,
+          max_tokens: 300,
           frequency_penalty: 0,
           presence_penalty: 0,
-          top_p: 0.9
+          top_p: 0.92
         }, {
           headers: {
             'Authorization': `Bearer ${apiKey}`,
@@ -405,13 +404,15 @@ exports.handler = async (event) => {
       } catch (err) {
         if (axios.isAxiosError(err)) {
           const status = (err.response && err.response.status) || 0
-          // 429 veya 5xx ise sıradaki modele geç
-          if (status === 429 || (status >= 500 && status < 600)) {
+          const errMsg = (err.response && err.response.data && (err.response.data.error?.message || err.response.data.message)) || ''
+          // 429, 404 (endpoint yok) veya 5xx -> sıradaki modele geç
+          if (status === 429 || status === 404 || (status >= 500 && status < 600) || /No endpoints found/i.test(errMsg)) {
             await wait(250)
             continue
           }
         }
-        throw err // diğer hatalarda direkt çık
+        // Diğer 4xx ise döndür (genelde istek hatası)
+        throw err
       }
     }
 
