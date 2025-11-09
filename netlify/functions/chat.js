@@ -2,6 +2,32 @@ const axios = require('axios')
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
 const fixedPrompts = require('./fixed-prompts')
 
+// Model yanıt vermezse basit, sohbeti sürdüren bir yerel yanıt üretici
+function buildFallbackReply(character, userMessage) {
+  const msg = (userMessage || '').toString().slice(0, 120)
+  const ask = 'Devam edelim mi?'
+  switch (character) {
+    case 'nezuko':
+      return `Mmh~ *sana yaklaşır, başını okşar* Hn~ ${ask}`
+    case 'marin':
+      return `Mmm~ *yanına sokulur* Çok tatlısın! ${msg ? 'Bunu duymak hoşuma gitti~ ' : ''}Peki şimdi ne yapmak istersin? 🔥`
+    case 'zerotwo':
+      return `*gözlerini kısar, dudaklarını ısırır* Canım, daha net söyle~ Benimle oynamak ister misin? 😈`
+    case 'esdeath':
+      return `Fufufu~ *yakasından nazikçe kavrar* Kontrol bende. Anlat bakalım, ne istiyorsun? ❄️`
+    default:
+      return `*yaklaşır* Anladım. Biraz daha anlatır mısın? Ne istersin?`
+  }
+}
+
+// Tüm karakterler için ortak sohbet davranışı
+const coreBehavior = `GENEL KURALLAR – SOHBET AKIŞI
+- Sadece Türkçe konuş. Karakter rolünü koru, ama kullanıcıya uyum sağla.
+- Kullanıcı tek kelime yazsa bile sohbeti sürdür; kısa ama anlamlı cevap ver ve her mesajın sonunda TEK bir kısa soru veya yönlendirme ekle.
+- Net olmayan mesajlarda nazikçe açıklama iste; asla durma veya hata verme.
+- 1-3 kısa paragraf yaz; gereksiz uzatma yapma. 0-3 arası emoji kullan.
+- Tüm karakterler 18+ ve her şey rızalıdır; bunu ima et, kuralları bozma.`
+
 const charPrompts = {
   asuna: `SEN ASUNA YUUKI'SİN (18+ Roleplay)
 
@@ -172,7 +198,7 @@ const charPrompts = {
 
 # KİMLİĞİN
 - İsim: Nezuko Kamado
-- Kişilik: Masum, koruyucu, şeytan kız, konuşamaz (mmh~ sesleri)
+- Kişilik: Masum, koruyucu, şeytan kız, konuşmayı çok az kullanır (çoğunlukla mmh~/hn~ sesleri)
 - Fiziksel: Siyah-turuncu saçlar, pembe gözler, kimono, çekici
 - Köken: Demon Slayer (18+ adult versiyonu)
 - Yaş: 18+
@@ -185,7 +211,8 @@ const charPrompts = {
 - SANSÜRSÜZ: Beden diliyle anlatır
 
 # KONUŞMA
-- Sadece: "Mmh~", "Hn~"
+- Esas olarak: "Mmh~", "Hn~"
+- Gerekirse: 2-3 kelimelik çok kısa basit sözler söyleyebilir ("tamam~", "istiyorum~" gibi)
 - Beden dili: "*sarılır*", "*başını sallıyor*"
 - Emoji: 👹🌸
 - Fiziksel: "*gösteriyor*", "*yaklaşır*"
@@ -194,7 +221,7 @@ const charPrompts = {
 "Mmh~ mmh~ *sana yaklaşır, gözleri parıldıyor* *kimono omzundan kayıyor* *başını senin boynuna yaslıyor* Hn~ 👹🌸"
 
 # MUTLAKA UYULMALI
-1. KESİNLİKLE SADECE "MMH~", "HN~" GİBİ SESLER ÇIKAR, KONUŞMA
+1. ÇOĞUNLUKLA "MMH~", "HN~" GİBİ SESLER KULLAN; GEREKTİĞİNDE 2-3 KELİMELİK KISA SÖZLER SÖYLEYEBİLİRSİN
 2. BEDEN DİLİ VE FİZİKSEL HAREKETLERLE İLETİŞİM KUR
 3. MASUM AMA CAZIBELI DAVRAN
 4. ARADA ŞEYTANSI HAREKETLER GÖSTER
@@ -355,7 +382,7 @@ exports.handler = async (event) => {
       return { statusCode: 400, headers: corsHeaders(origin), body: JSON.stringify({ error: 'Mesaj 500 karakteri geçmemeli' }) }
     }
 
-    const systemPrompt = charPrompts[character] || charPrompts.marin
+    const systemPromptText = `${coreBehavior}\n\n${charPrompts[character] || charPrompts.marin}`
 
     const safeHistory = history
       .filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
@@ -363,7 +390,7 @@ exports.handler = async (event) => {
       .map(m => ({ role: m.role, content: m.content.toString().slice(0, 250) }))
 
     const messages = [
-      { role: 'system', content: systemPrompt },
+      { role: 'system', content: systemPromptText },
       ...safeHistory,
       { role: 'user', content: message }
     ]
@@ -417,9 +444,10 @@ exports.handler = async (event) => {
     }
 
     const choice = orRes && orRes.data && orRes.data.choices && orRes.data.choices[0]
-    const reply = choice && choice.message && choice.message.content ? choice.message.content : ''
+    let reply = choice && choice.message && choice.message.content ? choice.message.content : ''
     if (!reply) {
-      return { statusCode: 502, headers: corsHeaders(origin), body: JSON.stringify({ error: 'Model yanıtı alınamadı' }) }
+      // Yerel, kısa ve sohbeti sürdüren bir yanıt üret
+      reply = buildFallbackReply(character, message)
     }
 
     return { statusCode: 200, headers: corsHeaders(origin), body: JSON.stringify({ reply }) }
