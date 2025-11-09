@@ -285,6 +285,9 @@ exports.handler = async (event) => {
   }
 
   try {
+    // Rate limiti aşmamak için kısa bir bekletme
+    await wait(300) // API çağrısından önce kısa bekletme
+    
     const body = JSON.parse(event.body || '{}')
     const character = (body.character || '').toString().toLowerCase()
     const messageRaw = (body.message || '').toString()
@@ -335,7 +338,7 @@ exports.handler = async (event) => {
         'HTTP-Referer': referer,
         'X-Title': 'TR Character Chat'
       },
-      timeout: 30000
+      timeout: 60000 // 60 saniye timeout, daha uzun süre bekle
     })
 
     const choice = orRes && orRes.data && orRes.data.choices && orRes.data.choices[0]

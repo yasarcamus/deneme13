@@ -62,6 +62,36 @@ const clearAllHistories = () => {
 }
 
 // Karakter değişiminde sohbeti yükle/değiştir
+// URL'den karakter yükle
+function loadCharacterFromHash() {
+  const hash = window.location.hash.substring(1);
+  if (hash && document.querySelector(`#character option[value="${hash}"]`)) {
+    characterEl.value = hash;
+    // Tema renklerini hemen güncelle
+    document.body.setAttribute('data-character', hash);
+    return true;
+  }
+  return false;
+}
+
+// Sayfa yüklenirken URL hash kontrolü
+window.addEventListener('load', () => {
+  if (loadCharacterFromHash()) {
+    // Eğer URL'den karakter yüklendiyse event tetikleyelim
+    const event = new Event('change');
+    characterEl.dispatchEvent(event);
+  }
+});
+
+// URL hash değiştiğinde karakter güncelle
+window.addEventListener('hashchange', () => {
+  if (loadCharacterFromHash()) {
+    // Eğer URL'den karakter yüklendiyse event tetikleyelim
+    const event = new Event('change');
+    characterEl.dispatchEvent(event);
+  }
+});
+
 characterEl.addEventListener('change', () => {
   // Tüm sohbet baloncuklarını temizle
   while (chatEl.children.length > 0) {
@@ -69,6 +99,9 @@ characterEl.addEventListener('change', () => {
   }
   
   const character = characterEl.value
+  
+  // URL'yi güncelle
+  window.location.hash = character
   
   // LocalStorage'dan bu karakter için geçmiş varsa yükle
   const savedHistory = loadHistory(character)
@@ -206,7 +239,7 @@ formEl.addEventListener('submit', async (e) => {
   
   // Track retries
   let retries = 0
-  const maxRetries = 3
+  const maxRetries = 5 // 3'ten 5'e çıkarıldı - daha fazla deneme
   
   try {
     async function sendRequest() {
@@ -268,7 +301,7 @@ formEl.addEventListener('submit', async (e) => {
         
         if (is429 && retries < maxRetries) {
           retries++
-          const waitTime = retries * 2000 // Exponential backoff: 2s, 4s, 6s
+          const waitTime = Math.pow(2, retries) * 1500 // Exponential backoff: 3s, 6s, 12s, 24s, 48s
           // Sessizce yeniden dene, mesaj gösterme
           await new Promise(resolve => setTimeout(resolve, waitTime))
         } else {
